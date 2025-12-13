@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Dependencies (reinstalled in container)
+node_modules
+.npm
+
+# Build output (rebuilt in container)
+.next
+out
+dist
+build
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Docs
+*.md
+
+# Claude
+.claude
