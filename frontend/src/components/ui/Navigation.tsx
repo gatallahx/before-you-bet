@@ -9,6 +9,7 @@ import { useTheme } from '@/lib/theme';
 const navItems = [
   { href: '/', label: 'Dashboard' },
   { href: '/markets', label: 'Markets' },
+  { href: '/browse', label: 'Browse' },
   { href: '/lookup', label: 'Lookup' },
 ];
 

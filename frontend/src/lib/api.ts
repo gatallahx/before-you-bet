@@ -67,10 +67,27 @@ async function fetchWithRetry<T>(
 }
 
 export async function getHistory(ticker: string): Promise<PriceHistory> {
-  const res = await fetch(`${API_URL}/history/${ticker}/raw`, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`Failed to fetch history for ${ticker} (status: ${res.status})`);
-  const raw: RawHistoryResponse = await res.json();
-  return transformRawHistory(raw);
+  const baseDelay = 1000;
+  let attempt = 0;
+
+  while (true) {
+    try {
+      const res = await fetch(`${API_URL}/history/${ticker}/raw`, { cache: 'no-store' });
+      if (res.ok) {
+        const raw: RawHistoryResponse = await res.json();
+        return transformRawHistory(raw);
+      }
+      // Non-200 response, will retry
+      console.log(`History fetch for ${ticker} returned ${res.status}, retrying...`);
+    } catch (error) {
+      console.log(`History fetch for ${ticker} failed, retrying...`, error);
+    }
+
+    // Exponential backoff with cap at 30 seconds
+    const delay = Math.min(baseDelay * Math.pow(2, attempt), 30000);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    attempt++;
+  }
 }
 
 export async function getEstimate(ticker: string): Promise<LLMEstimate> {
