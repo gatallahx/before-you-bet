@@ -44,6 +44,14 @@ export interface PriceHistory {
   price_change_pct: number;
 }
 
+// Gradient prediction from LLM analysis
+export interface GradientPrediction {
+  predicted_price: number;
+  confidence: number;
+  trend: 'up' | 'down' | 'neutral';
+  reasoning: string;
+}
+
 // Match backend LLMEstimate exactly
 export interface LLMEstimate {
   probability: number;
@@ -51,4 +59,36 @@ export interface LLMEstimate {
   key_takeaways: string[];
   risks: string[]; // Plain strings only
   reasoning: string;
+  gradient_prediction?: GradientPrediction;
+}
+
+// Raw API response types for /history/{ticker}/raw
+export interface RawPriceData {
+  open: number | null;
+  high: number | null;
+  low: number | null;
+  close: number | null;
+  mean: number | null;
+  previous: number | null;
+}
+
+export interface RawBidAskData {
+  open: number;
+  close: number;
+  high: number;
+  low: number;
+}
+
+export interface RawCandlestick {
+  end_period_ts: number;
+  open_interest: number;
+  volume: number;
+  price: RawPriceData;
+  yes_ask: RawBidAskData;
+  yes_bid: RawBidAskData;
+}
+
+export interface RawHistoryResponse {
+  ticker: string;
+  candlesticks: RawCandlestick[];
 }

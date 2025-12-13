@@ -28,7 +28,7 @@ export default function TickerDetailPage() {
       // Fetch all data in parallel
       const [marketData, historyData, estimateData] = await Promise.allSettled([
         getMarket(ticker),
-        getHistory(ticker, 30),
+        getHistory(ticker),
         getEstimate(ticker),
       ]);
 

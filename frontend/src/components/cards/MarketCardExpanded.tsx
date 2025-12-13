@@ -303,8 +303,31 @@ export function MarketCardExpanded({ market, history, estimate }: MarketCardExpa
             </div>
             {/* Probability if available */}
             {estimate && (
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-2">
                 <InfoRow label="AI Probability" value={`${Math.round(estimate.probability * 100)}%`} />
+                {/* Gradient Prediction */}
+                {estimate.gradient_prediction && (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Predicted Price</span>
+                      <span className={`text-sm font-medium flex items-center gap-1 ${
+                        estimate.gradient_prediction.trend === 'up'
+                          ? 'text-emerald-500'
+                          : estimate.gradient_prediction.trend === 'down'
+                          ? 'text-rose-500'
+                          : 'text-gray-500'
+                      }`}>
+                        {estimate.gradient_prediction.trend === 'up' && '↑'}
+                        {estimate.gradient_prediction.trend === 'down' && '↓'}
+                        {estimate.gradient_prediction.predicted_price}¢
+                      </span>
+                    </div>
+                    <InfoRow
+                      label="Confidence"
+                      value={`${Math.round(estimate.gradient_prediction.confidence * 100)}%`}
+                    />
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -346,6 +369,30 @@ export function MarketCardExpanded({ market, history, estimate }: MarketCardExpa
         <div className="min-h-[200px]">
           {activeTab === 'analysis' && (
             <div className="space-y-4">
+              {/* Gradient Prediction (if available) */}
+              {estimate?.gradient_prediction && (
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-300">Price Prediction</h4>
+                    <div className={`flex items-center gap-1 text-sm font-bold ${
+                      estimate.gradient_prediction.trend === 'up'
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : estimate.gradient_prediction.trend === 'down'
+                        ? 'text-rose-600 dark:text-rose-400'
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`}>
+                      {estimate.gradient_prediction.trend === 'up' && '↑'}
+                      {estimate.gradient_prediction.trend === 'down' && '↓'}
+                      {estimate.gradient_prediction.predicted_price}¢
+                      <span className="text-xs font-normal text-purple-600 dark:text-purple-400 ml-1">
+                        ({Math.round(estimate.gradient_prediction.confidence * 100)}% conf)
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-purple-800 dark:text-purple-200">{estimate.gradient_prediction.reasoning}</p>
+                </div>
+              )}
+
               {/* AI Reasoning (if estimate available) */}
               {estimate?.reasoning && (
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
