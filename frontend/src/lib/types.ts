@@ -1,47 +1,54 @@
-export interface HistoryPoint {
-  timestamp: number;
-  price: number;
-}
-
-export interface Risk {
-  description: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH';
-  likelihood: 'LOW' | 'MEDIUM' | 'HIGH';
-}
-
-export interface Source {
+// Match backend MarketSummary exactly
+export interface MarketSummary {
+  ticker: string;
   title: string;
-  url: string;
-  relevance: string;
+  yes_ask: number;
+  yes_bid: number;
+  volume: number;
+  open_interest: number;
+  close_time: string;
+  expiration_date: string;
 }
 
-export interface ProcessedEvent {
-  event_ticker: string;
-  market_ticker: string;
-  event_title: string;
-  market_title: string;
-  category: string | null;
-  current_yes_price: number | null;
-  yes_bid: number | null;
-  yes_ask: number | null;
-  volume_24h: number | null;
-  open_interest: number | null;
-  close_time: string | null;
-  expiration_time: string | null;
-  historicals: HistoryPoint[];
-  sentiment_score: number;
+// Match backend MarketData exactly
+export interface MarketData {
+  ticker: string;
+  title: string;
+  rules_primary: string;
+  rules_secondary: string;
+  best_ask_yes: number;
+  best_bid_yes: number;
+  volume: number;
+  open_interest: number;
+  close_time: string;
+  expiration_date: string;
+}
+
+// Match backend PriceCandle exactly
+export interface PriceCandle {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+// Match backend PriceHistory exactly
+export interface PriceHistory {
+  ticker: string;
+  title: string;
+  days: number;
+  candles: PriceCandle[];
+  price_change_30d: number;
+  price_change_pct: number;
+}
+
+// Match backend LLMEstimate exactly
+export interface LLMEstimate {
+  probability: number;
   analysis: string;
-  predicted_outcome: 'YES' | 'NO' | 'UNCERTAIN';
-  confidence: number;
-  summary: string;
-  tldr: string;
   key_takeaways: string[];
-  risks: Risk[];
-  sources: Source[];
-}
-
-export interface AnalyzeResponse {
-  success: boolean;
-  count: number;
-  markets: ProcessedEvent[];
+  risks: string[]; // Plain strings only
+  reasoning: string;
 }

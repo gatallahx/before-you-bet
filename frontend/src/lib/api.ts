@@ -1,69 +1,36 @@
-import { AnalyzeResponse, ProcessedEvent } from './types';
-import { getMarketsForChart, getMarketsForList } from './mock-data';
+import { MarketSummary, MarketData, PriceHistory, LLMEstimate } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// Flag to use mock data (set to false when backend is ready)
-const USE_MOCK_DATA = true;
-
-export async function analyzeMarkets(urls: string[]): Promise<AnalyzeResponse> {
-  if (USE_MOCK_DATA) {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const markets = getMarketsForList(urls.length || 20);
-    return {
-      success: true,
-      count: markets.length,
-      markets,
-    };
-  }
-
-  const response = await fetch(`${API_URL}/analyze`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ urls }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || 'Analysis failed');
-  }
-
-  return response.json();
+export async function getMarkets(limit = 100): Promise<MarketSummary[]> {
+  const res = await fetch(`${API_URL}/markets?limit=${limit}`);
+  if (!res.ok) throw new Error('Failed to fetch markets');
+  return res.json();
 }
 
-export async function getTrendingMarkets(count: number = 20): Promise<ProcessedEvent[]> {
-  if (USE_MOCK_DATA) {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return getMarketsForList(count);
-  }
-
-  // TODO: Implement when backend has trending endpoint
-  const response = await fetch(`${API_URL}/markets/trending?count=${count}`);
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch trending markets');
-  }
-
-  const data = await response.json();
-  return data.markets;
+export async function getMarket(ticker: string): Promise<MarketData> {
+  const res = await fetch(`${API_URL}/market/${ticker}`);
+  if (!res.ok) throw new Error('Failed to fetch market');
+  return res.json();
 }
 
-export async function getMarketsWithHistory(count: number = 10): Promise<ProcessedEvent[]> {
-  if (USE_MOCK_DATA) {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return getMarketsForChart(count);
-  }
+export async function getHistory(ticker: string, days = 30): Promise<PriceHistory> {
+  const res = await fetch(`${API_URL}/history/${ticker}?days=${days}`);
+  if (!res.ok) throw new Error('Failed to fetch history');
+  return res.json();
+}
 
-  // TODO: Implement when backend has historical data endpoint
-  const response = await fetch(`${API_URL}/markets/chart?count=${count}`);
+export async function getEstimate(ticker: string): Promise<LLMEstimate> {
+  const res = await fetch(`${API_URL}/estimate/${ticker}`);
+  if (!res.ok) throw new Error('Failed to fetch estimate');
+  return res.json();
+}
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch market history');
-  }
-
-  const data = await response.json();
-  return data.markets;
+// Combined fetch for dashboard - returns markets with their histories
+export async function getMarketsWithHistory(limit = 10): Promise<{ market: MarketSummary; history: PriceHistory }[]> {
+  const markets = await getMarkets(limit);
+  const histories = await Promise.all(
+    markets.slice(0, limit).map((m) => getHistory(m.ticker))
+  );
+  return markets.slice(0, limit).map((market, i) => ({ market, history: histories[i] }));
 }

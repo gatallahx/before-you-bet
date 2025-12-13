@@ -40,7 +40,7 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
       {/* Modal Container */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className="relative w-full max-w-4xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl transform transition-all"
+          className="relative w-full max-w-4xl bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-2xl transform transition-all"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { Navigation } from '@/components/ui/Navigation';
+import { AppShell } from '@/components/ui/AppShell';
 import { ThemeProvider } from '@/lib/theme';
 
 const inter = Inter({
@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Kalshi Analyzer',
+  title: 'Before You Bet',
   description: 'AI-powered prediction market analysis',
   icons: {
     icon: [
@@ -32,11 +32,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} font-sans antialiased bg-gray-50 dark:bg-gray-900 min-h-screen`}
+        className={`${inter.variable} font-sans antialiased bg-gray-100 dark:bg-gray-900 min-h-screen`}
       >
         <ThemeProvider>
-          <Navigation />
-          <main>{children}</main>
+          <AppShell>{children}</AppShell>
         </ThemeProvider>
       </body>
     </html>

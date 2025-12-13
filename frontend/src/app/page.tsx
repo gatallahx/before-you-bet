@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ProcessedEvent } from '@/lib/types';
+import { MarketSummary, PriceHistory } from '@/lib/types';
 import { getMarketsWithHistory } from '@/lib/api';
 import { TimeSeriesChart } from '@/components/charts/TimeSeriesChart';
 import { MarketCardExpanded } from '@/components/cards/MarketCardExpanded';
@@ -11,12 +11,14 @@ import { ErrorBanner } from '@/components/ui/ErrorBanner';
 import { formatPrice } from '@/lib/utils';
 import { getChartColor } from '@/lib/colors';
 
+type MarketWithHistory = { market: MarketSummary; history: PriceHistory };
+
 export default function DashboardPage() {
-  const [markets, setMarkets] = useState<ProcessedEvent[]>([]);
+  const [markets, setMarkets] = useState<MarketWithHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredTicker, setHoveredTicker] = useState<string | null>(null);
-  const [selectedMarket, setSelectedMarket] = useState<ProcessedEvent | null>(null);
+  const [selectedMarket, setSelectedMarket] = useState<MarketWithHistory | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -37,7 +39,7 @@ export default function DashboardPage() {
 
   return (
     <div className="h-[calc(100vh-4rem)] w-full flex items-center justify-center p-8 bg-gray-100 dark:bg-gray-950 overflow-hidden">
-      <div className="w-full h-full bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
+      <div className="w-full h-full bg-gray-50 dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center">
@@ -83,23 +85,20 @@ export default function DashboardPage() {
               </div>
               <div className="flex-1 overflow-y-auto">
                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {markets.map((market, index) => {
-                    const firstPrice = market.historicals[0]?.price || 0;
-                    const lastPrice =
-                      market.historicals[market.historicals.length - 1]?.price || 0;
-                    const change = lastPrice - firstPrice;
-                    const changePercent =
-                      firstPrice > 0
-                        ? ((change / firstPrice) * 100).toFixed(1)
-                        : '0';
+                  {markets.map(({ market, history }, index) => {
+                    // Calculate current price from bid/ask
+                    const currentPrice = (market.yes_bid + market.yes_ask) / 2;
+                    // Use backend-provided price change
+                    const change = history.price_change_30d;
+                    const changePercent = history.price_change_pct;
 
                     return (
                       <div
-                        key={market.market_ticker}
+                        key={market.ticker}
                         className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
-                        onMouseEnter={() => setHoveredTicker(market.market_ticker)}
+                        onMouseEnter={() => setHoveredTicker(market.ticker)}
                         onMouseLeave={() => setHoveredTicker(null)}
-                        onClick={() => setSelectedMarket(market)}
+                        onClick={() => setSelectedMarket({ market, history })}
                       >
                         <div className="flex items-start gap-2">
                           <div
@@ -108,11 +107,11 @@ export default function DashboardPage() {
                           />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
-                              {market.market_title}
+                              {market.title}
                             </p>
                             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                               <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                                {formatPrice(market.current_yes_price)}
+                                {formatPrice(currentPrice)}
                               </span>
                               <span
                                 className={`text-xs font-medium ${
@@ -124,18 +123,19 @@ export default function DashboardPage() {
                                 }`}
                               >
                                 {change > 0 ? '+' : ''}
-                                {change}¢
+                                {change.toFixed(1)}¢
                               </span>
                               <span
                                 className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${
-                                  market.predicted_outcome === 'YES'
+                                  changePercent > 0
                                     ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
-                                    : market.predicted_outcome === 'NO'
+                                    : changePercent < 0
                                     ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
                                     : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                                 }`}
                               >
-                                {market.predicted_outcome}
+                                {changePercent > 0 ? '+' : ''}
+                                {changePercent.toFixed(1)}%
                               </span>
                             </div>
                           </div>
@@ -149,14 +149,19 @@ export default function DashboardPage() {
 
             {/* Right Column - Time Series Chart (70%) */}
             <div className="w-[70%] p-4 flex flex-col overflow-hidden">
-              <TimeSeriesChart markets={markets} hoveredTicker={hoveredTicker} />
+              <TimeSeriesChart data={markets} hoveredTicker={hoveredTicker} />
             </div>
           </div>
         )}
 
         {/* Market Detail Modal */}
         <Modal isOpen={!!selectedMarket} onClose={() => setSelectedMarket(null)}>
-          {selectedMarket && <MarketCardExpanded market={selectedMarket} />}
+          {selectedMarket && (
+            <MarketCardExpanded
+              market={selectedMarket.market}
+              history={selectedMarket.history}
+            />
+          )}
         </Modal>
       </div>
     </div>

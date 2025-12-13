@@ -1,25 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ProcessedEvent } from '@/lib/types';
-import { getTrendingMarkets } from '@/lib/api';
+import { MarketSummary, PriceHistory } from '@/lib/types';
+import { getMarketsWithHistory } from '@/lib/api';
 import { MarketCard } from '@/components/cards/MarketCard';
 import { MarketCardExpanded } from '@/components/cards/MarketCardExpanded';
 import { Modal } from '@/components/ui/Modal';
 import { LoadingCard } from '@/components/ui/LoadingSpinner';
 import { ErrorBanner } from '@/components/ui/ErrorBanner';
 
+type MarketWithHistory = { market: MarketSummary; history: PriceHistory };
+
 export default function MarketsPage() {
-  const [markets, setMarkets] = useState<ProcessedEvent[]>([]);
+  const [markets, setMarkets] = useState<MarketWithHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMarket, setSelectedMarket] = useState<ProcessedEvent | null>(null);
+  const [selectedMarket, setSelectedMarket] = useState<MarketWithHistory | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getTrendingMarkets(20);
+      const data = await getMarketsWithHistory(20);
       setMarkets(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load data');
@@ -76,11 +78,11 @@ export default function MarketsPage() {
       {/* Market Cards Grid */}
       {!loading && markets.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {markets.map((market) => (
+          {markets.map(({ market, history }) => (
             <MarketCard
-              key={market.market_ticker}
+              key={market.ticker}
               market={market}
-              onExpand={() => setSelectedMarket(market)}
+              onExpand={() => setSelectedMarket({ market, history })}
             />
           ))}
         </div>
@@ -100,7 +102,12 @@ export default function MarketsPage() {
 
       {/* Market Detail Modal */}
       <Modal isOpen={!!selectedMarket} onClose={() => setSelectedMarket(null)}>
-        {selectedMarket && <MarketCardExpanded market={selectedMarket} />}
+        {selectedMarket && (
+          <MarketCardExpanded
+            market={selectedMarket.market}
+            history={selectedMarket.history}
+          />
+        )}
       </Modal>
     </div>
   );

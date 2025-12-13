@@ -34,20 +34,24 @@ export function LoadingState({ message = 'Loading...' }: { message?: string }) {
 
 export function LoadingCard() {
   return (
-    <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg p-6 animate-pulse">
-      <div className="flex justify-between items-start mb-4">
-        <div className="space-y-2">
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-48" />
-          <div className="h-4 bg-gray-100 dark:bg-gray-700/50 rounded w-32" />
-        </div>
-        <div className="text-right space-y-2">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16" />
-          <div className="h-5 bg-gray-100 dark:bg-gray-700/50 rounded w-24" />
+    <div className="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-xl p-4 animate-pulse overflow-hidden">
+      {/* Header with circle and title skeleton */}
+      <div className="flex gap-3 mb-4">
+        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg flex-shrink-0" />
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
+          <div className="h-3 bg-gray-100 dark:bg-gray-700/50 rounded w-1/2" />
         </div>
       </div>
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-100 dark:bg-gray-700/50 rounded w-full" />
-        <div className="h-4 bg-gray-100 dark:bg-gray-700/50 rounded w-3/4" />
+      {/* Price bar skeleton */}
+      <div className="flex items-center gap-3">
+        <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded w-14 flex-shrink-0" />
+        <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-700/50 rounded-full" />
+      </div>
+      {/* Footer skeleton */}
+      <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div className="h-3 bg-gray-100 dark:bg-gray-700/50 rounded w-16" />
+        <div className="w-7 h-7 bg-gray-100 dark:bg-gray-700/50 rounded-full" />
       </div>
     </div>
   );
