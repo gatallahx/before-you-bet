@@ -3,7 +3,7 @@
 Kalshi trading analysis API with decision metrics.
 
 Video showcase Demo link:
-https://github.com/gatallahx/before-you-bet/blob/master/Demo-Video.mp4
+https://youtu.be/U_aeCUsk1HY
 
 ## Setup
 
